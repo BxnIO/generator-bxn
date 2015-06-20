@@ -1,0 +1,7 @@
+.tmp
+.idea
+node_modules
+public
+dist
+npm-debug.log
+<%= clientRoot %>/bower_components

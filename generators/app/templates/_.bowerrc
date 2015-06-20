@@ -1,0 +1,3 @@
+{
+    "directory": "<%= clientRoot %>/bower_components"
+}

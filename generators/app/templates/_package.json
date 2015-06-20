@@ -1,0 +1,11 @@
+{
+   "name": "<%= appName %>",
+   "version": "<%= appVersion %>",
+   "description": "<%= appDescription %>",<% if(appHasRepository) { %>
+   "repository": {
+      "type": "<%= appRepositoryType %>",
+      "url": "<%= appRepositoryUrl %>"
+   },<% } %>
+   "author": "<%= appAuthor %><% if(appAuthorEmail) { %> <<%= appAuthorEmail %>><% } %>",
+   "main": "<%= serverRoot %>/app.js"
+}
