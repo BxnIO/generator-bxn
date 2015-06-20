@@ -13,6 +13,7 @@ var bxnGenerator = yeoman.Base.extend({
          appVersion: '0.0.1',
          serverPath: 'server',
          clientPath: 'client',
+         logPath: 'server/logs',
          defaultNodeModules: [
             'express',
             'lodash',
@@ -23,16 +24,15 @@ var bxnGenerator = yeoman.Base.extend({
             'express-session',
             'method-override',
             'request',
-            'serve-favicon'
+            'serve-favicon',
+            'morgan',
+            'winston'
          ],
          additionalNodeModules: [
             'composable-middleware',
             'express-jwt',
-            'jsonwebtoken',
             'memory-cache',
             'moment',
-            'morgan',
-            'winston'
          ],
          defaultBowerModules: [
             'angular',
@@ -48,7 +48,13 @@ var bxnGenerator = yeoman.Base.extend({
             'angular-animate',
             'localforage',
             'angular-localforage',
-            'angular-jwt'
+            'angular-jwt',
+            'angular-moment',
+            'angular-google-maps',
+            'angularjs-geolocation',
+            'angular-loading-bar',
+            'angular-media-queries',
+            'moment-timezone'
          ]
       };
       this.nodeModules = _.clone(this.defaults.defaultNodeModules, true);
@@ -152,14 +158,25 @@ var bxnGenerator = yeoman.Base.extend({
       if (this.useConfig) { return; }
       var done = this.async();
       this.log('\n*** Server Configuration ***\n');
-      this.log('\nNOTE: By default, we will install the following node modules: '+this.defaults.defaultNodeModules.join(', ')+'\n');
+      this.log('\nNOTE: By default, we will install the following node modules: \n\t'+this.defaults.defaultNodeModules.join(', ')+'\n');
       this.prompt([
          {
             type: 'input',
             name: 'serverRoot',
             message: 'What would you like your server root path to be? ['+process.cwd()+'/]',
             default: this.defaults.serverPath
-
+         }, {
+            type: 'confirm',
+            name: 'ServerLogging',
+            message: 'Would you like application logging output to file?'
+         }, {
+            type: 'input',
+            name: 'serverLogPath',
+            message: 'Where would you like the log written to? ['+process.cwd()+'/]',
+            default: this.defaults.logPath,
+            when: function (responses) {
+               return responses.ServerLogging;
+            }
          }, {
             type: 'checkbox',
             name: 'serverModules',
@@ -171,7 +188,7 @@ var bxnGenerator = yeoman.Base.extend({
          }
       ], function (responses) {
          _.forEach(responses, function (value, key) {
-            if (typeof value !== 'undefined') {
+            if (typeof value !== 'undefined' && key !== 'serverModules') {
                this.config.set(key, value);
             }
             if (key === 'serverModules') {
@@ -191,15 +208,54 @@ var bxnGenerator = yeoman.Base.extend({
    getClientConfig: function () {
       if (this.useConfig) { return; }
       var done = this.async();
+      var gen = this;
       this.log('\n*** Client Configuration ***\n');
-      this.log('\nNOTE: By default, we will install the following bower components: '+this.defaults.defaultBowerModules.join(', ')+'\n');
+      this.log('\nNOTE: By default, we will install the following bower components: \n\t'+this.defaults.defaultBowerModules.join(', ')+'\n');
       this.prompt([
          {
             type: 'input',
             name: 'clientRoot',
             message: 'What would you like your client root path to be? ['+process.cwd()+'/]',
             default: this.defaults.clientPath
-
+         }, {
+            type: 'list',
+            name: 'clientInterfaceFW',
+            message: 'Which interface framework would you like to use?',
+            choices: ['Bootstrap', 'Material Design'],
+            filter: function (val) {
+               var mod = (val.toLowerCase() === 'bootstrap') ? 'bootstrap' : 'angular-material';
+               gen.bowerModules.push(mod);
+               return mod;
+            }
+         }, {
+            type: 'confirm',
+            name: 'clientUseBootstrapUI',
+            message: 'Would you like to use AngularUI Bootstrap?',
+            when: function (responses) {
+               return (responses.clientInterfaceFW === 'bootstrap');
+            },
+            filter: function (val) {
+               if (val) { gen.bowerModules.push('angular-bootstrap'); }
+               return val;
+            }
+         }, {
+            type: 'list',
+            name: 'clientRouter',
+            message: 'Which Angular router would you like to use?',
+            choices: ['UI Router', 'Angular(v1.4) Router'],
+            filter: function (val) {
+               var mod = (val.toLowerCase() === 'ui router') ? 'angular-ui-router' : 'angular-new-router';
+               gen.bowerModules.push(mod);
+               return mod;
+            }
+         }, {
+            type: 'confirm',
+            name: 'clientUsesFontAwesome',
+            message: 'Would you like to use Font Awesome?',
+            filter: function (val) {
+               if (val) { gen.bowerModules.push('font-awesome'); }
+               return val;
+            }
          }, {
             type: 'checkbox',
             name: 'clientModules',
@@ -211,7 +267,7 @@ var bxnGenerator = yeoman.Base.extend({
          }
       ], function (responses) {
          _.forEach(responses, function (value, key) {
-            if (typeof value !== 'undefined') {
+            if (typeof value !== 'undefined' && key !== 'clientModules') {
                this.config.set(key, value);
             }
             if (key === 'clientModules') {
@@ -222,6 +278,18 @@ var bxnGenerator = yeoman.Base.extend({
          }, this);
          done();
       }.bind(this));
+   },
+   /**
+    * Verifies that all necessary modules exist in the module / component arrays
+    * for installation.
+    */
+   validateModules: function () {
+      if (this.useConfig) { return; }
+      // Go through a preinstall check and add any missing things
+
+      // Save the arrays in the config
+      this.config.set('nodemodules', this.nodeModules);
+      this.config.set('bowercomponents', this.bowerModules);
    },
    /**
     * Stores all gathered settings in the .yo-rc.json for use by sub generators.
@@ -258,7 +326,7 @@ var bxnGenerator = yeoman.Base.extend({
     * All done configuring. Perform template copies and module installs if the
     * user saved the configuration.
     */
-   end: function () {
+   postConfiguration: function () {
       if (this.doInstall) {
          var appCore = [
             {from:'_.bowerrc', to:'.bowerrc'},
@@ -280,16 +348,14 @@ var bxnGenerator = yeoman.Base.extend({
          }, this);
 
          // Install the latest and greatest!
-         this.async.series([
-             function (done) {
-               this.npmInstall(this.nodeModules, { 'save': true }, done());
-             },
-             function (done) {
-               this.bowerInstall(this.bowerModules, { 'save': true }, done());
-             }
-         ], function () {
-            this.log('\nYour application has been prepared. You may start it by running \'grunt serve\'.\n');
-         });
+         this.npmInstall(this.nodeModules, { 'save': true });
+         this.bowerInstall(this.bowerModules, { 'save': true });
+      }
+   },
+   // And Bob's your undle!
+   end: function () {
+      if (this.doInstall) {
+         this.log('\nYour application has been prepared. You may start it by running \'grunt serve\'.\n');
       }
    }
 });
