@@ -330,10 +330,10 @@ var bxnGenerator = yeoman.Base.extend({
       if (this.doInstall) {
          var appCore = [
             {from:'_.bowerrc', to:'.bowerrc'},
-            {from:'.gitattributes', to:'.gitattributes'},
+            {from:'_.gitattributes', to:'.gitattributes'},
             {from:'_.gitignore', to:'.gitignore'},
-            {from:'.jscsrc', to:'.jscsrc'},
-            {from:'.jshintrc', to:'.jshintrc'},
+            {from:'_.jscsrc', to:'.jscsrc'},
+            {from:'_.jshintrc', to:'.jshintrc'},
             {from:'_bower.json', to:'bower.json'},
             {from:'_package.json', to:'package.json'},
             {from:'_README.md', to:'README.md'},

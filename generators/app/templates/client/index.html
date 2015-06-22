@@ -1,0 +1,59 @@
+<!doctype html>
+<html ng-cloak ng-controller="SiteController as site">
+   <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <base href="/">
+      <title ng-bind-template="{{::site.title}}"></title>
+      <meta name="fragment" content="!">
+      <meta name="description" content="">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="shortcut icon" href="assets/icons/favicon.ico" type="image/x-icon" />
+      <link rel="icon" href="assets/icons/favicon.png" type="image/png" />
+      <!-- Apple Touch Icons -->
+      <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+      <link rel="apple-touch-icon" sizes="57x57" ng-href="assets/icons/apple-touch-icon-57x57.png" />
+      <link rel="apple-touch-icon" sizes="72x72" ng-href="assets/icons/apple-touch-icon-72x72.png" />
+      <link rel="apple-touch-icon" sizes="114x114" ng-href="assets/icons/apple-touch-icon-114x114.png" />
+      <link rel="apple-touch-icon" sizes="144x144" ng-href="assets/icons/apple-touch-icon-144x144.png" />
+      <link rel="apple-touch-icon" sizes="60x60" ng-href="assets/icons/apple-touch-icon-60x60.png" />
+      <link rel="apple-touch-icon" sizes="120x120" ng-href="assets/icons/apple-touch-icon-120x120.png" />
+      <link rel="apple-touch-icon" sizes="76x76" ng-href="assets/icons/apple-touch-icon-76x76.png" />
+      <link rel="apple-touch-icon" sizes="152x152" ng-href="assets/icons/apple-touch-icon-152x152.png" />
+      <!-- Windows 8 Tile Icons -->
+      <meta name="msapplication-square70x70logo" content="assets/icons/smalltile.png" />
+      <meta name="msapplication-square150x150logo" content="assets/icons/mediumtile.png" />
+      <meta name="msapplication-wide310x150logo" content="assets/icons/widetile.png" />
+      <meta name="msapplication-square310x310logo" content="assets/icons/largetile.png" />
+      <!-- build:css(client) app/vendor.css -->
+      <!-- bower:css -->
+      <!-- endbower -->
+      <!-- endbuild -->
+      <!-- build:css({.tmp,client}) app/app.css -->
+      <link rel="stylesheet" href="app/app.css">
+      <!-- injector:css -->
+      <!-- endinjector -->
+      <!-- endbuild -->
+   </head>
+
+   <body>
+      <div ui-view="header"></div>
+      <div ui-view="content"></div>
+      <div ui-view="footer"></div>
+
+      <!--[if lt IE 9]>
+         <script src="bower_components/es5-shim/es5-shim.js"></script>
+         <script src="bower_components/json3/lib/json3.min.js"></script>
+      <![endif]-->
+      <!-- build:js({client,node_modules}) app/vendor.js -->
+      <!-- bower:js -->
+      <!-- endbower -->
+      <!-- endbuild -->
+
+      <!-- build:js({.tmp,client}) app/app.js -->
+      <script src="app/app.js"></script>
+      <!-- injector:js -->
+      <!-- endinjector -->
+      <!-- endbuild -->
+   </body>
+</html>
